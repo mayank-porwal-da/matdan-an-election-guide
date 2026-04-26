@@ -18,13 +18,13 @@ Follow this step-by-step guide to master the electoral process:
 - *Note:* You cannot skip ahead to future stages until you've reached them, but you can always revisit completed stages.
 
 ### 3. Explore Stage Content
-Each stage consists of three interactive sections (tabs):
+Each stage consists of three interactive sections (tabs), with an additional specialized tab in the final stage:
 - **Overview:** Learn about the process, key facts, and why that specific stage matters in the democratic cycle.
 - **Quiz:** Test your understanding with a knowledge check. Immediate feedback and explanations are provided for every answer.
 - **Mitra (AI Guide):** Converse with "Mitra," your dedicated AI election expert. 
     - *Requirement:* You need to provide your own **Google Gemini API Key** to enable this feature.
     - Click the **"AI"** button in the top-right header (or the prompt inside the chat) to enter your key.
-    - Your key is stored safely in your browser's local storage and is never sent to any external server except for direct API calls to Google.
+- **Election Dates (Stage 7 only):** Access a real-time tracking panel for Lok Sabha and Vidhan Sabha election schedules (2026-2029).
 
 ### 4. Complete the Guide
 - Once you finish all 7 stages, you'll reach the **Completion Screen**.
@@ -40,9 +40,9 @@ Each stage consists of three interactive sections (tabs):
 - **Animations:** Framer Motion (Fluid transitions and staggered reveals)
 - **Icons:** Lucide React
 - **AI Integration:** Google Generative AI (@google/generative-ai)
-- **Model:** gemini-2.5-flash
+- **Model:** Gemini 1.5 Flash
 
 ---
 
 ## 🔗 Live Application
-https://matdan-election-assistant-93341298859.us-central1.run.app
+[Check out Matdan Live here](https://matdan-election-assistant-93341298859.us-central1.run.app)

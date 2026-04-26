@@ -10,9 +10,11 @@ import {
   Loader2,
   Settings,
   CheckCircle2,
-  XCircle
+  XCircle,
+  Calendar
 } from "lucide-react";
 import { Stage } from "../data/stages";
+import ElectionDates from "./ElectionDates";
 
 interface StageCardProps {
   stage: Stage;
@@ -33,7 +35,7 @@ export default function StageCard({
   onOpenSettings,
   hasApiKey
 }: StageCardProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'quiz' | 'chat'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'quiz' | 'chat' | 'dates'>('overview');
   const [chatInput, setChatInput] = useState("");
 
   const currentChatHistory = chatState.histories[stage.id - 1] || [];
@@ -44,6 +46,16 @@ export default function StageCard({
     onSendChat(stage.id - 1, chatInput, stage.systemPrompt);
     setChatInput("");
   };
+
+  const tabs = [
+    { id: 'overview', icon: Info, label: 'Overview' },
+    { id: 'quiz', icon: HelpCircle, label: 'Quiz', indicator: quizFinished },
+    { id: 'chat', icon: Sparkles, label: 'Mitra' }
+  ];
+
+  if (stage.id === 7) {
+    tabs.push({ id: 'dates', icon: Calendar, label: 'Dates' });
+  }
 
   return (
     <motion.div 
@@ -89,24 +101,29 @@ export default function StageCard({
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-white/10 mb-8 sticky top-0 bg-bg/95 backdrop-blur-md z-30 -mx-6 px-6 pt-2">
-        {[
-          { id: 'overview', icon: Info, label: 'Overview' },
-          { id: 'quiz', icon: HelpCircle, label: 'Quiz', indicator: quizFinished },
-          { id: 'chat', icon: Sparkles, label: 'Mitra' }
-        ].map(tab => (
+      <div className="flex border-b border-white/10 mb-8 sticky top-0 bg-bg/95 backdrop-blur-md z-30 -mx-6 px-6 pt-2 overflow-x-auto scrollbar-hide">
+        {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
             aria-label={`View ${tab.label}`}
             className={`
-              flex items-center gap-2 px-4 sm:px-6 py-4 text-[10px] sm:text-xs font-black tracking-widest uppercase transition-all relative
+              flex items-center gap-2 px-4 sm:px-6 py-4 text-[10px] sm:text-xs font-black tracking-widest uppercase transition-all relative shrink-0
               ${activeTab === tab.id ? 'text-white' : 'text-muted hover:text-white/60'}
             `}
           >
             <tab.icon className={`w-3.5 sm:w-4 h-3.5 sm:h-4 ${activeTab === tab.id ? 'text-india-blue' : ''}`} />
             <span className="hidden xs:inline">{tab.label}</span>
-            {tab.indicator && (
+            {tab.id === 'dates' && (
+              <motion.span 
+                animate={{ scale: [1, 1.1, 1], opacity: [0.8, 1, 0.8] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="ml-1.5 px-1.5 py-0.5 bg-accent text-[8px] font-black rounded-md text-white shadow-[0_0_10px_rgba(230,57,70,0.5)]"
+              >
+                LIVE
+              </motion.span>
+            )}
+            {('indicator' in tab && tab.indicator) && (
               <span className="ml-1 text-[10px] text-india-green">✓</span>
             )}
             {activeTab === tab.id && (
@@ -169,6 +186,27 @@ export default function StageCard({
                     {stage.whyItMatters}
                   </p>
                 </div>
+
+                {stage.id === 7 && (
+                  <motion.div 
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    onClick={() => setActiveTab('dates')}
+                    className="cursor-pointer bg-gradient-to-br from-india-blue/20 to-accent/20 p-6 rounded-3xl border border-white/10 space-y-3 shadow-xl hover:border-india-blue/50 transition-all group"
+                  >
+                    <div className="flex items-center gap-2 text-white">
+                      <Calendar className="w-4 h-4 text-india-blue group-hover:scale-110 transition-transform" />
+                      <span className="text-[10px] font-black tracking-widest uppercase">Live Schedule</span>
+                    </div>
+                    <p className="text-xs text-muted leading-relaxed font-light">
+                      Check out the **Election Dates** tab for real-time ECI schedules for 2026-2029!
+                    </p>
+                    <div className="flex items-center gap-1 text-[10px] font-black text-india-blue uppercase tracking-widest">
+                      View Dates <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </motion.div>
+                )}
               </div>
             </div>
           )}
@@ -396,6 +434,10 @@ export default function StageCard({
                 </div>
               </div>
             </div>
+          )}
+
+          {activeTab === 'dates' && (
+            <ElectionDates />
           )}
         </motion.div>
       </AnimatePresence>
