@@ -45,4 +45,4 @@ Each stage consists of three interactive sections (tabs):
 ---
 
 ## 🔗 Live Application
-[https://matdan-election-assistant-93341298859.us-central1.run.app]
+https://matdan-election-assistant-93341298859.us-central1.run.app
