@@ -40,7 +40,7 @@ Each stage consists of three interactive sections (tabs), with an additional spe
 - **Animations:** Framer Motion (Fluid transitions and staggered reveals)
 - **Icons:** Lucide React
 - **AI Integration:** Google Generative AI (@google/generative-ai)
-- **Model:** Gemini 1.5 Flash
+- **Model:** gemini-2.5-flash
 
 ---
 
