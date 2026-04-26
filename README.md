@@ -40,9 +40,9 @@ Each stage consists of three interactive sections (tabs):
 - **Animations:** Framer Motion (Fluid transitions and staggered reveals)
 - **Icons:** Lucide React
 - **AI Integration:** Google Generative AI (@google/generative-ai)
-- **Model:** Gemini 1.5 Flash
+- **Model:** gemini-2.5-flash
 
 ---
 
 ## 🔗 Live Application
-[Link to be inserted post-deployment]
+https://matdan-election-assistant-93341298859.us-central1.run.app
