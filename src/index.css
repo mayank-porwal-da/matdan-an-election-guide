@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-display: "Playfair Display", serif;
+  --font-mono: "DM Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-bg: #0a0a0f;
+  --color-surface: #13131a;
+  --color-surface2: #1c1c26;
+  --color-accent: #e63946;
+  --color-india-red: #e63946;
+  --color-india-green: #06d6a0;
+  --color-india-blue: #4cc9f0;
+  --color-india-gold: #ffd166;
+  --color-text: #f0eff0;
+  --color-muted: #8b8a96;
+  --color-border: rgba(255, 255, 255, 0.08);
+
+  --shadow-accent-glow: 0 0 15px rgba(230, 57, 70, 0.4);
+  --shadow-gold-glow: 0 0 8px rgba(255, 209, 102, 0.6);
+  --shadow-panel-left: -20px 0 40px rgba(0, 0, 0, 0.4);
+}
+
+:root {
+  --bg: #0a0a0f;
+  --surface: #13131a;
+  --surface2: #1c1c26;
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #f0eff0;
+  --muted: #8b8a96;
+  --accent: #e63946;
+  --green: #06d6a0;
+  --blue: #4cc9f0;
+  --gold: #ffd166;
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-text font-sans antialiased overflow-x-hidden;
+    background-color: var(--bg);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif font-bold;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted/20 rounded-full hover:bg-muted/40 transition-colors;
+  }
+}
+
+@layer components {
+  .glow-red {
+    @apply absolute top-[-100px] left-[-100px] w-[500px] h-[500px] bg-accent opacity-[0.05] blur-[120px] rounded-full pointer-events-none;
+  }
+  
+  .glow-blue {
+    @apply absolute bottom-[-100px] right-[-100px] w-[500px] h-[500px] bg-india-blue opacity-[0.05] blur-[120px] rounded-full pointer-events-none;
+  }
+
+  .text-clamp-title {
+    font-size: clamp(48px, 8vw, 120px);
+  }
+
+  .text-clamp-stage {
+    font-size: clamp(28px, 5vw, 60px);
+  }
+}
+
+/* Global focus styles */
+:focus-visible {
+  @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-bg;
+}
