@@ -1,11 +1,14 @@
 import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
+import PledgeCounter from "./PledgeCounter";
 
 interface LandingPageProps {
   onStart: () => void;
+  onStartParliament: () => void;
+  hasProgress?: boolean;
 }
 
-export default function LandingPage({ onStart, hasProgress }: LandingPageProps & { hasProgress?: boolean }) {
+export default function LandingPage({ onStart, onStartParliament, hasProgress }: LandingPageProps) {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -69,7 +72,7 @@ export default function LandingPage({ onStart, hasProgress }: LandingPageProps &
           </div>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center">
+        <motion.div variants={itemVariants} className="flex flex-col items-center gap-6">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -79,6 +82,19 @@ export default function LandingPage({ onStart, hasProgress }: LandingPageProps &
           >
             {hasProgress ? 'Resume Journey' : 'Begin the journey'} <ArrowRight className="w-7 h-7 group-hover:translate-x-1.5 transition-transform" />
           </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onStartParliament}
+            className="px-8 py-3 rounded-full border border-white/20 text-muted font-bold tracking-widest uppercase hover:bg-white/5 transition-all text-sm flex items-center gap-3"
+          >
+            🏛️ Understand Parliament <ArrowRight className="w-4 h-4 opacity-50" />
+          </motion.button>
+        </motion.div>
+
+        <motion.div variants={itemVariants} className="pt-12">
+          <PledgeCounter />
         </motion.div>
       </motion.div>
     </div>

@@ -13,21 +13,27 @@ import {
   XCircle,
   Calendar
 } from "lucide-react";
-import { Stage } from "../data/stages";
+import { Stage, ChatHistories, QuizState } from "../types";
 import ElectionDates from "./ElectionDates";
 
 interface StageCardProps {
   stage: Stage;
-  quizState: any;
-  chatState: { histories: any[]; isLoading: boolean; error: string | null };
+  totalStages: number;
+  quizState: {
+    answers: QuizState;
+    correct: number;
+    total: number;
+  };
+  chatState: { histories: ChatHistories; isLoading: boolean; error: string | null };
   onAnswerQuiz: (stageId: number, qIndex: number, optionIdx: number) => any;
-  onSendChat: (stageId: number, text: string, systemPrompt: string) => void;
+  onSendChat: (chatKey: string, text: string, systemPrompt: string) => void;
   onOpenSettings: () => void;
   hasApiKey: boolean;
 }
 
 export default function StageCard({ 
   stage, 
+  totalStages,
   quizState, 
   chatState, 
   onAnswerQuiz, 
@@ -38,12 +44,12 @@ export default function StageCard({
   const [activeTab, setActiveTab] = useState<'overview' | 'quiz' | 'chat' | 'dates'>('overview');
   const [chatInput, setChatInput] = useState("");
 
-  const currentChatHistory = chatState.histories[stage.id - 1] || [];
+  const currentChatHistory = chatState.histories[stage.code] || [];
   const quizFinished = quizState.answers[stage.id] && Object.keys(quizState.answers[stage.id]).length === stage.quiz.length;
 
   const handleSendChat = () => {
     if (!chatInput.trim() || chatState.isLoading) return;
-    onSendChat(stage.id - 1, chatInput, stage.systemPrompt);
+    onSendChat(stage.code, chatInput, stage.systemPrompt);
     setChatInput("");
   };
 
@@ -53,7 +59,7 @@ export default function StageCard({
     { id: 'chat', icon: Sparkles, label: 'Mitra' }
   ];
 
-  if (stage.id === 7) {
+  if (stage.id === 7 && totalStages === 7) {
     tabs.push({ id: 'dates', icon: Calendar, label: 'Dates' });
   }
 
@@ -70,7 +76,7 @@ export default function StageCard({
       <div className="space-y-6 mb-12">
         <div className="flex items-center gap-4">
           <span className="text-[10px] font-mono tracking-[0.3em] uppercase text-muted">
-            Stage {stage.id} of 7
+            Stage {stage.id} of {totalStages}
           </span>
           <div className="h-[1px] flex-1 bg-white/5"></div>
         </div>
@@ -382,7 +388,7 @@ export default function StageCard({
                     {stage.quickPrompts.map((prompt, idx) => (
                       <button
                         key={idx}
-                        onClick={() => !chatState.isLoading && onSendChat(stage.id - 1, prompt, stage.systemPrompt)}
+                        onClick={() => !chatState.isLoading && onSendChat(stage.code, prompt, stage.systemPrompt)}
                         className="px-5 py-2.5 rounded-full border border-white/10 bg-surface/50 text-[10px] font-black text-muted hover:text-white hover:border-india-blue hover:bg-india-blue/5 transition-all active:scale-95 uppercase tracking-widest"
                       >
                         {prompt}

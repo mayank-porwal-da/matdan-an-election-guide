@@ -1,73 +1,66 @@
 import { useState, useEffect } from 'react';
+import { ProgressState } from '../types';
 
-export function useProgress() {
-  const [currentStage, setCurrentStage] = useState(() => {
-    const saved = localStorage.getItem('matdan_progress');
+export function useProgress(storageKey: string = 'matdan_progress', totalStages: number = 7) {
+  const [state, setState] = useState<ProgressState>(() => {
+    const saved = localStorage.getItem(storageKey);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        return parsed.currentStage || 0;
+        return {
+          currentStage: parsed.currentStage ?? 0,
+          completedStages: parsed.completedStages ?? []
+        };
       } catch (e) {
-        return 0;
+        // Fallback
       }
     }
-    return 0;
+    return { currentStage: 0, completedStages: [] };
   });
 
-  const [completedStages, setCompletedStages] = useState<Set<number>>(() => {
-    const saved = localStorage.getItem('matdan_progress');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        return new Set(parsed.completedStages || []);
-      } catch (e) {
-        return new Set();
-      }
-    }
-    return new Set();
-  });
+  const [completedSet, setCompletedSet] = useState<Set<number>>(new Set(state.completedStages));
 
   useEffect(() => {
-    localStorage.setItem('matdan_progress', JSON.stringify({
-      currentStage,
-      completedStages: Array.from(completedStages)
+    localStorage.setItem(storageKey, JSON.stringify({
+      currentStage: state.currentStage,
+      completedStages: Array.from(completedSet)
     }));
-  }, [currentStage, completedStages]);
+  }, [state.currentStage, completedSet, storageKey]);
 
   const setStage = (n: number) => {
-    if (n >= 0 && n < 7) {
-      setCurrentStage(n);
+    if (n >= 0 && n < totalStages) {
+      setState(prev => ({ ...prev, currentStage: n }));
     }
   };
 
   const next = () => {
-    if (currentStage < 6) {
-      setCurrentStage(prev => prev + 1);
+    if (state.currentStage < totalStages - 1) {
+      setState(prev => ({ ...prev, currentStage: prev.currentStage + 1 }));
     }
   };
 
   const prev = () => {
-    if (currentStage > 0) {
-      setCurrentStage(prev => prev - 1);
+    if (state.currentStage > 0) {
+      setState(prev => ({ ...prev, currentStage: prev.currentStage - 1 }));
     }
   };
 
   const markCompleted = (stageIndex: number) => {
-    setCompletedStages(prev => {
+    setCompletedSet(prev => {
       const next = new Set(prev);
       next.add(stageIndex);
       return next;
     });
   };
 
-  const isAllCompleted = completedStages.size === 7;
+  const isAllCompleted = completedSet.size === totalStages;
 
   return { 
-    currentStage, 
+    currentStage: state.currentStage, 
     setStage, 
     next, 
     prev, 
-    completedStages, 
+    completedStages: completedSet, 
     markCompleted, 
     isAllCompleted 
   };

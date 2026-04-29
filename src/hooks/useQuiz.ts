@@ -1,20 +1,9 @@
 import { useState, useEffect } from 'react';
-import { stages } from '../data/stages';
+import { Stage, QuizState } from '../types';
 
-interface Answer {
-  selectedBase0: number;
-  correct: boolean;
-}
-
-interface QuizState {
-  [stageId: number]: {
-    [qIndex: number]: Answer;
-  };
-}
-
-export function useQuiz() {
+export function useQuiz(stages: Stage[], storageKey: string = 'matdan_quiz') {
   const [answers, setAnswers] = useState<QuizState>(() => {
-    const saved = localStorage.getItem('matdan_quiz');
+    const saved = localStorage.getItem(storageKey);
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -26,8 +15,8 @@ export function useQuiz() {
   });
 
   useEffect(() => {
-    localStorage.setItem('matdan_quiz', JSON.stringify(answers));
-  }, [answers]);
+    localStorage.setItem(storageKey, JSON.stringify(answers));
+  }, [answers, storageKey]);
 
   const answerQuestion = (stageId: number, qIndex: number, selectedOption: number) => {
     const stage = stages.find(s => s.id === stageId);

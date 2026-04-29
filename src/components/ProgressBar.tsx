@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { Check } from "lucide-react";
-import { Stage } from "../data/stages";
+import { Stage } from "../types";
 
 interface ProgressBarProps {
   stages: Stage[];

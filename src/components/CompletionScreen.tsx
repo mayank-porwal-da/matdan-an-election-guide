@@ -1,12 +1,15 @@
 import { motion } from "motion/react";
 import { RotateCcw, ExternalLink } from "lucide-react";
+import PledgeCounter from "./PledgeCounter";
 
 interface CompletionScreenProps {
   quizScore: { correct: number; total: number };
+  stagesCount: number;
   onRestart: () => void;
+  isParliament?: boolean;
 }
 
-export default function CompletionScreen({ quizScore, onRestart }: CompletionScreenProps) {
+export default function CompletionScreen({ quizScore, stagesCount, onRestart, isParliament }: CompletionScreenProps) {
   return (
     <div id="completion-screen" className="flex flex-col items-center justify-center p-6 md:p-12 text-center h-full max-w-4xl mx-auto space-y-12">
       <motion.div
@@ -15,7 +18,7 @@ export default function CompletionScreen({ quizScore, onRestart }: CompletionScr
         transition={{ type: "spring", damping: 10, stiffness: 100 }}
         className="text-8xl md:text-9xl mb-4"
       >
-        🎉
+        {isParliament ? '🏛️' : '🎉'}
       </motion.div>
 
       <div className="space-y-4">
@@ -24,7 +27,7 @@ export default function CompletionScreen({ quizScore, onRestart }: CompletionScr
           animate={{ opacity: 1, y: 0 }}
           className="text-5xl md:text-7xl font-serif font-black text-india-gold tracking-tight"
         >
-          You know how India votes.
+          {isParliament ? 'Knowledge Empowered.' : 'You know how India votes.'}
         </motion.h1>
         <motion.p 
           initial={{ opacity: 0 }}
@@ -32,7 +35,10 @@ export default function CompletionScreen({ quizScore, onRestart }: CompletionScr
           transition={{ delay: 0.3 }}
           className="text-xl text-muted max-w-2xl mx-auto"
         >
-          Jai Hind! You've successfully navigated the 7 stages of the world's largest democratic process.
+          {isParliament 
+            ? `Jai Hind! You've successfully understood the foundations of India's Parliament.`
+            : `Jai Hind! You've successfully navigated the ${stagesCount} stages of the world's largest democratic process.`
+          }
         </motion.p>
       </div>
 
@@ -47,7 +53,7 @@ export default function CompletionScreen({ quizScore, onRestart }: CompletionScr
           <div className="text-xs text-muted font-mono tracking-widest uppercase">Quiz Answers Correct</div>
         </div>
         <div className="bg-surface p-6 rounded-2xl border border-white/10">
-          <div className="text-3xl font-serif font-bold text-white mb-1">7</div>
+          <div className="text-3xl font-serif font-bold text-white mb-1">{stagesCount}</div>
           <div className="text-xs text-muted font-mono tracking-widest uppercase">Stages Completed</div>
         </div>
       </motion.div>
@@ -72,6 +78,15 @@ export default function CompletionScreen({ quizScore, onRestart }: CompletionScr
         >
           <ExternalLink className="w-5 h-5" /> REGISTER TO VOTE
         </a>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.2 }}
+        className="w-full"
+      >
+        <PledgeCounter />
       </motion.div>
     </div>
   );

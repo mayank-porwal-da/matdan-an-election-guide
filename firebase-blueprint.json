@@ -1,0 +1,20 @@
+{
+  "entities": {
+    "Counter": {
+      "title": "Counter",
+      "description": "Global counters for the applet",
+      "type": "object",
+      "properties": {
+        "count": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["count"]
+    }
+  },
+  "firestore": {
+    "/counters/{counterId}": {
+      "schema": "Counter",
+      "description": "Collection of global stats"
+    }
+  }
+}

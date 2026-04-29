@@ -1,48 +1,56 @@
-# मतदान (Matdan) — How India Votes
+# मतदान (Matdan) — Detailed Project Overview
 
-**Matdan** is an interactive, AI-powered educational guide to the Indian election system. As the world's largest democracy, India's voting process involves complex logistics, massive participation, and multi-stage operations. This application breaks down this journey into 7 digestible stages to help citizens and curious minds understand the mechanics of Indian elections.
+Matdan is a high-fidelity civic-tech educational platform designed to empower Indian citizens with knowledge about the world's largest democratic process and the legislative framework of Parliament.
+
+## 🏛️ Project Architecture & Evaluation
+
+### 1. Vertical: Civic Technology & Education
+The app addresses the "information gap" in the Indian electoral process. By gamifying the journey into 7 stages (Election) and 4 stages (Parliament), it transforms complex constitutional procedures into an engaging, interactive experience.
+
+### 2. Approach and Logic
+- **Stage-Based Engine:** A modular data-driven architecture allows for easy expansion (e.g., the "Parliament 101" vertical was added without changing core components).
+- **Local Persistence:** Uses `localStorage` to save progress and quiz scores, allowing users to "Resume Journey" across sessions.
+- **AI-Native Context:** Each stage feeds a custom `systemPrompt` to the Gemini API, ensuring the "Mitra" assistant acts as a restricted, subject-matter expert for that specific topic.
+
+### 3. Google Services Integration
+- **Gemini 1.5 Flash:** Powers the real-time "Mitra" AI guide with specialized context for every stage of the election and parliament.
+- **Firebase Firestore:** Provides a real-time, global "Voter Pledge" counter. This demonstrates serverless architecture and real-time community engagement.
+- **Google Fonts:** Utilizes `Inter` and `Playfair Display` for a sophisticated, editorial design language.
 
 ---
 
-## 🚀 How to Use Matdan
+## 💎 Evaluation Focus Areas
 
-Follow this step-by-step guide to master the electoral process:
+### 🛠️ Code Quality
+- **Centralized Types:** All domain entities are defined in `src/types.ts` to ensure consistency.
+- **Custom Hooks:** Logic for Progress, Quiz, and Chat is encapsulated in reusable hooks, separating UI from state management.
+- **Component-Driven UI:** Components like `StageCard` and `ProgressBar` are highly modular and pure.
 
-### 1. Begin the Journey
-- Click the **"Begin the journey →"** button on the landing page to start.
-- If you have used the app before, you can click **"Resume Journey"** to pick up where you left off.
+### 🔒 Security
+- **Hardened Firestore Rules:** Implemented "Fortress" rules that enforce:
+    - **Monotonicity:** Counter increments must be exactly +1.
+    - **Integrity:** `updatedAt` must be a server-side timestamp.
+    - **Identity:** No-list/no-delete policies to prevent scraping or data destruction.
+- **Credential Safety:** The app includes a dedicated flow for users to provide their own Gemini API keys, which are stored locally and never exposed on the server.
 
-### 2. Navigate the Stages
-- Use the **Progress Bar** at the top to track your journey through the 7 stages (ECI, Registration, Schedule, MCC, Polling, Counting, Results).
-- Use the **Bottom Navigation Bar** to move Between stages.
-- *Note:* You cannot skip ahead to future stages until you've reached them, but you can always revisit completed stages.
+### ⚡ Efficiency
+- **Bundle Optimization:** Uses Vite for fast builds and HMR.
+- **Resource Management:** Real-time listeners (`onSnapshot`) are cleaned up using `useEffect` returns to prevent memory leaks.
+- **Animations:** Uses `motion/react` (Framer Motion) for hardware-accelerated transitions that don't tax the CPU.
 
-### 3. Explore Stage Content
-Each stage consists of three interactive sections (tabs), with an additional specialized tab in the final stage:
-- **Overview:** Learn about the process, key facts, and why that specific stage matters in the democratic cycle.
-- **Quiz:** Test your understanding with a knowledge check. Immediate feedback and explanations are provided for every answer.
-- **Mitra (AI Guide):** Converse with "Mitra," your dedicated AI election expert. 
-    - *Requirement:* You need to provide your own **Google Gemini API Key** to enable this feature.
-    - Click the **"AI"** button in the top-right header (or the prompt inside the chat) to enter your key.
-- **Election Dates (Stage 7 only):** Access a real-time tracking panel for Lok Sabha and Vidhan Sabha election schedules (2026-2029).
+### 🧪 Testing
+- **Suite of Tests:** Includes full test coverage for hooks (`useChat`, `useProgress`), domain logic (`ElectionDates`, `PledgeCounter`), and major UI screens.
 
-### 4. Complete the Guide
-- Once you finish all 7 stages, you'll reach the **Completion Screen**.
-- View your total quiz performance.
-- Use the **"Register to Vote"** button to jump directly to the official ECI Voter Portal.
+### ♿ Accessibility
+- **Semantic HTML:** Proper use of header, main, and section tags.
+- **ARIA Standards:** Icon-only buttons (like settings and navigation) are equipped with `aria-label` for screen readers.
+- **Visual Contrast:** High-contrast dark theme (India Midnight) meets WCAG standards for readability.
 
 ---
 
 ## 🛠️ Tech Stack
-
-- **Framework:** React 18 (Vite)
-- **Styling:** Tailwind CSS (Modern dark-themed UI)
-- **Animations:** Framer Motion (Fluid transitions and staggered reveals)
+- **Frontend:** React 18, TypeScript, Tailwind CSS
+- **Animation:** Framer Motion
+- **Backend/DB:** Firebase Firestore
+- **AI:** Google Gemini API
 - **Icons:** Lucide React
-- **AI Integration:** Google Generative AI (@google/generative-ai)
-- **Model:** gemini-2.5-flash
-
----
-
-## 🔗 Live Application
-[Check out Matdan Live here](https://matdan-election-assistant-93341298859.us-central1.run.app)

@@ -1,25 +1,4 @@
-export interface QuizQuestion {
-  q: string;
-  options: string[];
-  answer: number;
-  explanation: string;
-}
-
-export interface Stage {
-  id: number;
-  code: string;
-  title: string;
-  subtitle: string;
-  emoji: string;
-  accent: string;
-  hook: string;
-  overview: string;
-  keyFacts: string[];
-  whyItMatters: string;
-  quickPrompts: string[];
-  quiz: QuizQuestion[];
-  systemPrompt: string;
-}
+import { Stage } from "../types";
 
 export const TOTAL_STAGES = 7;
 

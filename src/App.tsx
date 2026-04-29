@@ -12,35 +12,24 @@ import BottomNav from "./components/BottomNav";
 import ApiKeyModal from "./components/ApiKeyModal";
 import CompletionScreen from "./components/CompletionScreen";
 import { stages, TOTAL_STAGES } from "./data/stages";
+import { parliamentStages, TOTAL_PARLIAMENT_STAGES } from "./data/parliamentStages";
 import { useProgress } from "./hooks/useProgress";
 import { useQuiz } from "./hooks/useQuiz";
 import { useChat } from "./hooks/useChat";
 
-type AppState = 'landing' | 'guide' | 'completion';
+type AppState = 'landing' | 'guide' | 'completion' | 'parliament-guide' | 'parliament-completion';
 
 export default function App() {
-  const [appState, setAppState] = useState<AppState>(() => {
-    // If progress exists but not all completed, we stay on landing but will offer resume
-    return 'landing';
-  });
+  const [appState, setAppState] = useState<AppState>('landing');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
-  const { 
-    currentStage, 
-    setStage, 
-    next, 
-    prev, 
-    completedStages, 
-    markCompleted, 
-    isAllCompleted 
-  } = useProgress();
+  // Election Progress
+  const electionProgress = useProgress('matdan_progress', TOTAL_STAGES);
+  const electionQuiz = useQuiz(stages, 'matdan_quiz');
 
-  const { 
-    answers, 
-    answerQuestion, 
-    getStageScore, 
-    getTotalScore 
-  } = useQuiz();
+  // Parliament Progress
+  const parliamentProgress = useProgress('matdan_parliament_progress', TOTAL_PARLIAMENT_STAGES);
+  const parliamentQuiz = useQuiz(parliamentStages, 'matdan_parliament_quiz');
 
   const { 
     histories, 
@@ -51,29 +40,40 @@ export default function App() {
     setApiKey 
   } = useChat();
 
-  const hasProgress = completedStages.size > 0;
+  const isParliament = appState === 'parliament-guide' || appState === 'parliament-completion';
+  const currentStages = isParliament ? parliamentStages : stages;
+  const currentProgress = isParliament ? parliamentProgress : electionProgress;
+  const currentQuiz = isParliament ? parliamentQuiz : electionQuiz;
+  const totalStagesCount = isParliament ? TOTAL_PARLIAMENT_STAGES : TOTAL_STAGES;
+
+  const hasProgress = electionProgress.completedStages.size > 0 || parliamentProgress.completedStages.size > 0;
 
   React.useEffect(() => {
-    if (appState === 'guide') {
-      const stage = stages[currentStage];
+    if (appState === 'guide' || appState === 'parliament-guide') {
+      const stage = currentStages[currentProgress.currentStage];
       document.title = `Stage ${stage.id}: ${stage.title} — Matdan`;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (appState === 'landing') {
       document.title = "Matdan — India Election Guide";
     } else {
-      document.title = "Jai Hind! — Matdan Journey Complete";
+      document.title = "Complete — Matdan Journey";
     }
-  }, [appState, currentStage]);
+  }, [appState, currentProgress.currentStage, currentStages]);
 
   const handleStart = () => setAppState('guide');
-  const handleFinish = () => setAppState('completion');
-  const handleRestart = () => {
-    // Basic reset - in a real app we might clear all localStorage
-    setAppState('landing');
-    setStage(0);
+  const handleStartParliament = () => setAppState('parliament-guide');
+  
+  const handleFinish = () => {
+    if (appState === 'guide') setAppState('completion');
+    if (appState === 'parliament-guide') setAppState('parliament-completion');
   };
 
-  const currentStageData = stages[currentStage];
+  const handleRestart = () => {
+    setAppState('landing');
+    currentProgress.setStage(0);
+  };
+
+  const currentStageData = currentStages[currentProgress.currentStage];
   const apiKey = getApiKey() || "";
 
   return (
@@ -92,13 +92,13 @@ export default function App() {
           <h1 className="text-2xl font-serif font-black tracking-tight">MATDAN</h1>
         </div>
 
-        {appState === 'guide' && (
+        {(appState === 'guide' || appState === 'parliament-guide') && (
           <div className="hidden lg:block h-full">
             <ProgressBar 
-              stages={stages}
-              currentStage={currentStage}
-              completedStages={completedStages}
-              onJumpTo={setStage}
+              stages={currentStages}
+              currentStage={currentProgress.currentStage}
+              completedStages={currentProgress.completedStages}
+              onJumpTo={currentProgress.setStage}
             />
           </div>
         )}
@@ -106,6 +106,7 @@ export default function App() {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => setIsSettingsOpen(true)}
+            aria-label="AI Settings"
             className={`
               p-2.5 rounded-full transition-all border border-white/10 hover:bg-white/5
               ${apiKey ? 'text-india-green' : 'text-india-gold'}
@@ -128,17 +129,22 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-1 overflow-hidden relative z-10 flex flex-col">
         {appState === 'landing' && (
-          <LandingPage onStart={handleStart} hasProgress={hasProgress} />
+          <LandingPage 
+            onStart={handleStart} 
+            onStartParliament={handleStartParliament}
+            hasProgress={hasProgress} 
+          />
         )}
 
-        {appState === 'guide' && (
+        {(appState === 'guide' || appState === 'parliament-guide') && (
           <div className="flex-1 overflow-y-auto">
             <StageCard 
               stage={currentStageData}
+              totalStages={totalStagesCount}
               quizState={{
-                answers: answers,
-                correct: getStageScore(currentStageData.id).correct,
-                total: getStageScore(currentStageData.id).total
+                answers: currentQuiz.answers,
+                correct: currentQuiz.getStageScore(currentStageData.id).correct,
+                total: currentQuiz.getStageScore(currentStageData.id).total
               }}
               chatState={{
                 histories,
@@ -146,10 +152,8 @@ export default function App() {
                 error: chatError
               }}
               onAnswerQuiz={(sId, qIdx, oIdx) => {
-                const result = answerQuestion(sId, qIdx, oIdx);
-                // Auto-mark completed if some criteria met? 
-                // For now, any activity marks it completed conceptually
-                markCompleted(currentStage);
+                const result = currentQuiz.answerQuestion(sId, qIdx, oIdx);
+                currentProgress.markCompleted(currentProgress.currentStage);
                 return result;
               }}
               onSendChat={sendMessage}
@@ -159,22 +163,24 @@ export default function App() {
           </div>
         )}
 
-        {appState === 'completion' && (
+        {(appState === 'completion' || appState === 'parliament-completion') && (
           <CompletionScreen 
-            quizScore={getTotalScore()}
+            quizScore={currentQuiz.getTotalScore()}
+            stagesCount={totalStagesCount}
+            isParliament={isParliament}
             onRestart={handleRestart}
           />
         )}
       </main>
 
       {/* Navigation Footer */}
-      {appState === 'guide' && (
+      {(appState === 'guide' || appState === 'parliament-guide') && (
         <BottomNav 
-          currentStage={currentStage}
-          totalStages={TOTAL_STAGES}
-          onPrev={prev}
-          onNext={next}
-          isCompleted={isAllCompleted}
+          currentStage={currentProgress.currentStage}
+          totalStages={totalStagesCount}
+          onPrev={currentProgress.prev}
+          onNext={currentProgress.next}
+          isCompleted={currentProgress.isAllCompleted}
           onFinish={handleFinish}
         />
       )}

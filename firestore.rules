@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+
+    // Counter validation
+    function isValidCounter(data) {
+      return data.keys().hasAll(['count', 'updatedAt']) && 
+             data.keys().size() == 2 &&
+             data.count is int &&
+             data.count >= 0 &&
+             data.updatedAt == request.time;
+    }
+
+    match /counters/{counterId} {
+      // Anyone can see the counter
+      allow get: if isValidId(counterId);
+      
+      // Anyone can create if it starts at 1
+      allow create: if isValidId(counterId) && 
+                      isValidCounter(incoming()) && 
+                      incoming().count == 1;
+      
+      // Anyone can increment by exactly 1
+      allow update: if isValidId(counterId) && 
+                      isValidCounter(incoming()) && 
+                      incoming().count == existing().count + 1 &&
+                      incoming().diff(existing()).affectedKeys().hasOnly(['count', 'updatedAt']);
+    }
+  }
+}

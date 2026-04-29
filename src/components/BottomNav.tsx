@@ -18,6 +18,7 @@ export default function BottomNav({ currentStage, totalStages, onPrev, onNext, i
       <button 
         onClick={onPrev}
         disabled={isFirst}
+        aria-label="Previous Stage"
         className={`
           flex items-center gap-2 px-6 py-3 rounded-full font-serif font-bold transition-all
           ${isFirst ? 'opacity-0 pointer-events-none' : 'hover:bg-white/5 text-white active:scale-95'}
@@ -41,6 +42,7 @@ export default function BottomNav({ currentStage, totalStages, onPrev, onNext, i
       ) : (
         <button 
           onClick={onNext}
+          aria-label="Next Stage"
           className="flex items-center gap-2 px-8 py-3 bg-accent text-white rounded-full font-serif font-black text-lg shadow-accent-glow active:scale-95 transition-all"
         >
           NEXT <ChevronRight className="w-5 h-5" />

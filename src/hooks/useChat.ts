@@ -1,20 +1,16 @@
 import { useState } from 'react';
-import { GoogleGenerativeAI, Content } from '@google/generative-ai';
-
-export interface ChatMessage {
-  role: 'user' | 'model';
-  parts: { text: string }[];
-}
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { ChatMessage, ChatHistories } from '../types';
 
 export function useChat() {
-  const [histories, setHistories] = useState<ChatMessage[][]>(Array(7).fill([]));
+  const [histories, setHistories] = useState<ChatHistories>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const getApiKey = () => localStorage.getItem('matdan_api_key');
   const setApiKey = (key: string) => localStorage.setItem('matdan_api_key', key);
 
-  const sendMessage = async (stageIndex: number, userText: string, systemPrompt: string) => {
+  const sendMessage = async (chatKey: string, userText: string, systemPrompt: string) => {
     const apiKey = getApiKey();
     if (!apiKey) {
       setError('Please provide a Gemini API key in settings.');
@@ -26,12 +22,13 @@ export function useChat() {
 
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
+      
       const model = genAI.getGenerativeModel({ 
-        model: "gemini-2.5-flash",
+        model: "gemini-1.5-flash-latest",
         systemInstruction: systemPrompt
       });
 
-      const currentHistory = histories[stageIndex];
+      const currentHistory = histories[chatKey] || [];
       const chat = model.startChat({
         history: currentHistory.map(msg => ({
           role: msg.role,
@@ -46,16 +43,15 @@ export function useChat() {
       const newUserMessage: ChatMessage = { role: 'user', parts: [{ text: userText }] };
       const newAiMessage: ChatMessage = { role: 'model', parts: [{ text: aiText }] };
 
-      setHistories(prev => {
-        const next = [...prev];
-        next[stageIndex] = [...next[stageIndex], newUserMessage, newAiMessage];
-        return next;
-      });
+      setHistories(prev => ({
+        ...prev,
+        [chatKey]: [...(prev[chatKey] || []), newUserMessage, newAiMessage]
+      }));
     } catch (err: any) {
       let friendlyError = err.message || 'Failed to get response from Gemini';
       
       if (err.message?.includes('404') || err.message?.includes('not found')) {
-        friendlyError = "Model not found. This is often a region-based restriction for 'gemini-1.5-flash'. Try using a different API key or check your AI Studio region settings.";
+        friendlyError = "Model not found. Try using a different API key or check your AI Studio region settings.";
       } else if (err.message?.includes('401')) {
         friendlyError = "Invalid API Key. Please check your credentials in settings.";
       }
@@ -67,12 +63,11 @@ export function useChat() {
     }
   };
 
-  const clearHistory = (stageIndex: number) => {
-    setHistories(prev => {
-      const next = [...prev];
-      next[stageIndex] = [];
-      return next;
-    });
+  const clearHistory = (chatKey: string) => {
+    setHistories(prev => ({
+      ...prev,
+      [chatKey]: []
+    }));
   };
 
   return { histories, sendMessage, clearHistory, isLoading, error, getApiKey, setApiKey };
